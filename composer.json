@@ -1,0 +1,21 @@
+{
+  "name": "joaov535/shipping-calculator",
+  "description": "description",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Joaov535",
+      "email": "joaovictorcruz535@gmail.com",
+      "homepage": "https://github.com/Joaov535"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "shippingCalculator\\": "src/"
+    }
+  },
+  "require": {
+    "ext-curl": "*"
+  }
+}
