@@ -16,6 +16,8 @@
     }
   },
   "require": {
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "ext-soap": "*",
+    "ext-simplexml": "*"
   }
 }
