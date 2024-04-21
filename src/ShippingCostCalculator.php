@@ -299,9 +299,10 @@ class ShippingCostCalculator
 
     }
 
-    public function getAlfaTransportesShippingCost(): array
+    public function getAlfaTransportesShippingCost(string $token): array
     {
-
+        $company = new \shippingCalculator\carriers\AlfaTransportes($this, $token);
+        return $company->doRequest();
     }
 
     public function toArray(): array
