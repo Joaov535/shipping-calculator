@@ -2,7 +2,7 @@
 
 namespace shippingCalculator\carriers;
 
-class Atual
+class Atual extends AbstractSsw
 {
 
 }
