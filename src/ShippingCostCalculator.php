@@ -239,6 +239,16 @@ class ShippingCostCalculator
         return $this->boxList;
     }
 
+    public function getTotalVolume(): int|float
+    {
+        $acc = 0;
+        foreach ($this->boxList as $box) {
+            $m3 = $box['width'] * $box['height'] * $box['depth'];
+            $acc += $m3;
+        }
+        return $acc;
+    }
+
     public function getBoxListInMeters(): array
     {
         $boxInMeters = [];
