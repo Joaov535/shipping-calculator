@@ -264,13 +264,10 @@ class ShippingCostCalculator
     }
 
 
-
     public function getBraspressShippingCost(string $token): array
     {
         $company = new \shippingCalculator\carriers\Braspress($token, $this);
-        $company->request();
-
-        return array();
+        return $company->doRequest();
     }
 
 
