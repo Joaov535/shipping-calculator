@@ -49,7 +49,7 @@ class Braspress
                 'Content-Length: ' . strlen($this->requestBody))
         );
 
-        $response = json_decode(curl_exec($ch));
+        $response = json_decode(curl_exec($ch), true);
 
         if (curl_errno($ch)) {
             $response = [
