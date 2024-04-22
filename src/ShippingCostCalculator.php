@@ -276,8 +276,11 @@ class ShippingCostCalculator
     }
 
 
-    public function getMovviShippingCost(): array
-    {
+//    public function getMovviShippingCost(): array
+//    {
+//        $movvi = new Movvi();
+//        return $movvi->doRequest();
+//    }
 
     /**
      * @param array $credentials ["user" => xxxxxx, "password" => xxxxxx]
