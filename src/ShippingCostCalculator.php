@@ -56,7 +56,7 @@ class ShippingCostCalculator
     public function __construct(
         int       $senderCNPJ,
         int       $senderIE,
-        string    $senderPersonType = 'J',
+        string    $senderPersonType,
         string    $senderTributarySituation,
         int       $senderZipCode,
         int       $receiverIdentification,
