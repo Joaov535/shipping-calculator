@@ -6,7 +6,7 @@ use shippingCalculator\ShippingCostCalculator;
 
 class Rodonaves
 {
-    private ShippingCostCalculator $shipping
+    private ShippingCostCalculator $shipping;
     private \SplFixedArray $credentials;
     private \CurlHandle|false $curl;
     public const URL_TOKEN = "https://01wapi.rte.com.br/token";
