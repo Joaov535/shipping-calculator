@@ -279,10 +279,11 @@ class ShippingCostCalculator
     public function getMovviShippingCost(): array
     {
 
-    }
-
-
-    public function getRodonavesShippingCost(): array
+    /**
+     * @param array $credentials ["user" => xxxxxx, "password" => xxxxxx]
+     * @return array
+     */
+    public function getRodonavesShippingCost($credentials): array
     {
         $rodonaves = new Rodonaves($this, $credentials);
         return $rodonaves->doRequest();
