@@ -82,7 +82,7 @@ abstract class AbstractSsw
 
             }
         } catch (\Exception $e) {
-            $request = [
+            return [
                 "erro" => "SSW: " . $e->getMessage()
             ];
         }
