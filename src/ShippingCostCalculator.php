@@ -271,8 +271,8 @@ class ShippingCostCalculator
 
     public function getBraspressShippingCost(string $token): array
     {
-        $company = new \shippingCalculator\carriers\Braspress($token, $this);
-        return $company->doRequest();
+        $braspress = new Braspress($token, $this);
+        return $braspress->doRequest();
     }
 
 
@@ -284,29 +284,47 @@ class ShippingCostCalculator
 
     public function getRodonavesShippingCost(): array
     {
-
+        $rodonaves = new Rodonaves($this, $credentials);
+        return $rodonaves->doRequest();
     }
 
 
     public function getTntShippingCost(): array
     {
-
+        $tnt = new Tnt();
+        return $tnt->doRequest();
     }
 
 
-    public function getJundiaiShippingCost(): array
+    public function getJundiaiShippingCost(string $token): array
     {
-
+        $jundiai = new Jundiai($this, $token);
+        return $jundiai->doRequest();
     }
 
-    public function getAtualShippingCost(): array
+    /**
+     * @param array $credentials ["login" => xxxxx, "password" => xxxxx, "domain" => ]
+     * @return array
+     */
+    public function getAtualShippingCost(array $credentials): array
     {
+        $atual = new Atual($this, $credentials, 'Atual');
+        return $atual->doRequest();
+    }
 
+    /**
+     * @param array $credentials ["login" => xxxxx, "password" => xxxxx, "domain" => ]
+     * @return array
+     */
+    public function getExcellenceShippingCost(array $credentials): array
+    {
+        $excellence = new Atual($this, $credentials, 'Excellence');
+        return $excellence->doRequest();
     }
 
     public function getAlfaTransportesShippingCost(string $token): array
     {
-        $company = new \shippingCalculator\carriers\AlfaTransportes($this, $token);
+        $company = new AlfaTransportes($this, $token);
         return $company->doRequest();
     }
 
