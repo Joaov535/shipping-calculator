@@ -2,8 +2,13 @@
 
 namespace shippingCalculator;
 
+use shippingCalculator\carriers\AlfaTransportes;
+use shippingCalculator\carriers\Atual;
 use shippingCalculator\carriers\Braspress;
+use shippingCalculator\carriers\Jundiai;
 use shippingCalculator\carriers\Movvi;
+use shippingCalculator\carriers\Rodonaves;
+use shippingCalculator\carriers\Tnt;
 
 class ShippingCostCalculator
 {
