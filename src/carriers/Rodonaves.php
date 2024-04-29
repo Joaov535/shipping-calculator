@@ -6,18 +6,20 @@ use shippingCalculator\ShippingCostCalculator;
 
 class Rodonaves
 {
+    private string $token;
     private ShippingCostCalculator $shipping;
     private \SplFixedArray $credentials;
     private \CurlHandle|false $curl;
-    public const URL_TOKEN = "https://01wapi.rte.com.br/token";
-    public const URL_QUOTE = "https://quotation-apigateway.rte.com.br/api/v1/simula-cotacao";
+    public const string URL_TOKEN = "https://01wapi.rte.com.br/token";
+    public const string URL_QUOTE = "https://quotation-apigateway.rte.com.br/api/v1/simula-cotacao";
+    public const string url_city = "https://quotation-apigateway.rte.com.br/api/v1/simula-cotacao";
     private array $requestBody;
 
     /**
      * @param ShippingCostCalculator $shipping
      * @param array $credentials ["user" => xxxxxx, "password" => xxxxxx]
      */
-    public function __construct(ShippingCostCalculator $shipping,array $credentials)
+    public function __construct(ShippingCostCalculator $shipping, array $credentials)
     {
         $this->shipping = $shipping;
         $this->credentials = new \SplFixedArray(2);
@@ -26,26 +28,40 @@ class Rodonaves
         $this->setBodyRequest();
     }
 
-    private function getToken()
+    private function setToken()
     {
         $data = 'auth_type=dev&grant_type=password&username=' . $this->credentials['user'] . '&password=' . $this->credentials['password'];
         $this->curl = curl_init(self::URL_TOKEN);
         curl_setopt_array(
             $this->curl,
             array(
-                CURLOPT_POST           => true,
-                CURLOPT_POSTFIELDS     => $data,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $data,
                 CURLOPT_RETURNTRANSFER => true
             )
         );
-        return json_decode(curl_exec($this->curl), true);
-
+        $this->token = json_decode(curl_exec($this->curl), true);
     }
 
-    private function boxList()
+    private function getCityCode($cep)
+    {
+        $url = "https://01wapi.rte.com.br/api/v1/busca-por-cep?zipCode="; // GET
+        $headers = array("Authorization: Bearer " . $this->getToken());
+        curl_setopt_array(
+            $this->curl,
+            array(
+                CURLOPT_URL => $url,
+                CURLOPT_HTTPHEADER => $headers,
+                CURLOPT_POST => false
+            )
+        );
+        return json_decode(curl_exec($this->curl), true);
+    }
+
+    private function setBoxList(): array
     {
         $list = [];
-        foreach ($this->shipping->getBoxList() as $box){
+        foreach ($this->shipping->getBoxList() as $box) {
             $newBox = [
                 "Weight" => $box->getWeight(),
                 "Height" => $box->getHeight(),
@@ -62,13 +78,13 @@ class Rodonaves
     {
         $this->requestBody = [
             "OriginZipCode" => $this->shipping->getSenderZipCode(),
-            "OriginCityId" => $this->shipping['CityId'],
+            "OriginCityId" => $this->getCityCode($this->shipping->getSenderZipCode()),
             "DestinationZipCode" => $this->shipping->getReceiverZipCode(),
-            "DestinationCityId" => $this->shipping['CityId'],
+            "DestinationCityId" => $this->getCityCode($this->shipping->getReceiverZipCode()),
             "TotalWeight" => $this->shipping->getTotalWeight(),
             "EletronicInvoiceValue" => $this->shipping->getSerialValue(),
             "CustomerTaxIdRegistration" => $this->shipping->getSenderCNPJ(),
-            "Packs" => $this->boxList()
+            "Packs" => $this->setBoxList()
         ];
     }
 
@@ -81,9 +97,9 @@ class Rodonaves
             $this->curl,
             array(
                 CURLOPT_URL => self::URL_QUOTE,
-                CURLOPT_POST           => true,
+                CURLOPT_POST => true,
                 CURLOPT_HTTPHEADER => $headers,
-                CURLOPT_POSTFIELDS     => json_encode($this->requestBody),
+                CURLOPT_POSTFIELDS => json_encode($this->requestBody),
                 CURLOPT_RETURNTRANSFER => true
             )
         );
