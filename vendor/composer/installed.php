@@ -3,7 +3,7 @@
         'name' => 'joaov535/shipping-calculator',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '965bc3ac353b3c14647090a4b78e7df1015835f5',
+        'reference' => '3bf06041933d617d7bb58bba0324ab8c63ba0e7f',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'joaov535/shipping-calculator' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '965bc3ac353b3c14647090a4b78e7df1015835f5',
+            'reference' => '3bf06041933d617d7bb58bba0324ab8c63ba0e7f',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
