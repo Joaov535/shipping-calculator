@@ -59,7 +59,7 @@ class Jundiai
     public function doRequest(): array
     {
         $client = new \SoapClient(self::WSDL);
-        $xml = $client->FreteCombinado($this->requestBody);
+        $xml = $client->__soapCall("FreteCombinado",$this->requestBody);
         $jundiaiQuotation = (array)simplexml_load_string($xml);
 
         $quotation = array();
