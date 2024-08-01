@@ -1,0 +1,35 @@
+{
+  "name": "joaov535/shipping-calculator",
+  "description": "Biblioteca para realizar a cotação com algumas transportadoras nacionais.",
+  "version": "1.0.2",
+  "keywords": [
+    "Frete",
+    "Cotação",
+    "TNT",
+    "BRASPRESS",
+    "RODONAVES",
+    "ALFA",
+    "JUNDIAÍ",
+    "SSW"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "João Araujo Cruz",
+      "email": "joaovictorcruz535@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "shippingCalculator\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^8.2",
+    "ext-curl": "*",
+    "ext-soap": "*",
+    "ext-simplexml": "*"
+  },
+  "minimum-stability": "beta",
+  "prefer-stable": true
+}
