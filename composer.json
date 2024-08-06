@@ -28,7 +28,8 @@
     "php": "^8.2",
     "ext-curl": "*",
     "ext-soap": "*",
-    "ext-simplexml": "*"
+    "ext-simplexml": "*",
+    "ext-dom": "*"
   },
   "minimum-stability": "beta",
   "prefer-stable": true
