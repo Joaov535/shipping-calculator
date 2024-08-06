@@ -98,7 +98,7 @@ class Movvi implements CarriersInterface
         curl_close($chCotacao);
 
         if (!isset($responseQuotation['mensagem'])) {
-            $quotation['id'] = null;
+            $quotation['id'] = $this->companyName .'_'.time();
             $quotation['tempo_previsto'] = $responseQuotation['cotacoes']['horasPrazoEntrega'] / 24;
             $quotation['valor_total'] = round(floatval($responseQuotation['cotacoes']['ffValorCotacao']), 2);
             $quotation['transportador'] = $this->companyName;
@@ -106,7 +106,7 @@ class Movvi implements CarriersInterface
             return $quotation;
         }
 
-        $quotation['id'] = null;
+        $quotation['id'] =  $this->companyName .'_'.time();
         $quotation['transportador'] = $this->companyName;
         $quotation['tempo_previsto'] = "Sem resposta";
         $quotation['valor_total'] = 0;

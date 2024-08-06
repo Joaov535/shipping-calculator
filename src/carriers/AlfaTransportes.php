@@ -38,6 +38,7 @@ class AlfaTransportes implements CarriersInterface
         curl_close($ch);
 
         $quotation = [];
+        $quotation['id'] = 'Alfa_Transportes_' . time();
         $quotation['transportador'] = 'Alfa Transportes';
 
         if (empty($response['cotacao'])) {

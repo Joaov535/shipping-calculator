@@ -62,9 +62,9 @@ class Jundiai implements CarriersInterface
         $client = new \SoapClient(self::WSDL);
         try {
             $xmlResponse = $client->__soapCall("FreteCombinado", [$this->requestBody]);
-        } catch (\Exception $e) {
-            $quotation['id'] = null;
-            $quotation['tempo_previsto'] = $e->getMessage();
+        } catch (\Exception) {
+            $quotation['id'] = $this->companyName . '_' . time();
+            $quotation['tempo_previsto'] = "Falha ao realizar requisição";
             $quotation['valor_total'] = 0;
             $quotation['transportador'] = $this->companyName;
 
@@ -72,7 +72,7 @@ class Jundiai implements CarriersInterface
         }
 
         if (!isset($xmlResponse->FreteCombinadoResult->any)) {
-            $quotation['id'] = null;
+            $quotation['id'] = $this->companyName . '_' . time();
             $quotation['tempo_previsto'] = "Sem Resposta";
             $quotation['valor_total'] = 0;
             $quotation['transportador'] = $this->companyName;
@@ -94,12 +94,12 @@ class Jundiai implements CarriersInterface
                 $daysToDelivery = $jundiaiQuotation['qtDiasPrevisaoEntrega'];
             }
 
-            $quotation['id'] = null;
+            $quotation['id'] = $this->companyName . '_' . time();
             $quotation['tempo_previsto'] = $daysToDelivery;
             $quotation['valor_total'] = $jundiaiQuotation['vlFrete'];
             $quotation['transportador'] = $this->companyName;
         }
-        
+
         return $quotation;
     }
 }

@@ -67,7 +67,7 @@ class Braspress implements CarriersInterface
         curl_close($ch);
 
         if (is_null($response)) {
-            $quotation['id'] = null;
+            $quotation['id'] = $this->companyName . '_' . time();
             $quotation['transportador'] = $this->companyName;
             $quotation['tempo_previsto'] = "Sem resposta";
             $quotation['valor_total'] = 0;

@@ -66,9 +66,7 @@ abstract class AbstractSsw implements CarriersInterface
 
             $sswQuotation = (array)simplexml_load_string($xml);
 
-            $lowerTranspName = strtolower($this->companyName);
-            $referenceCode = "code_quotation_{$lowerTranspName}_{$sswQuotation['cotacao']}";
-            $quotation['id'] = $referenceCode;
+            $quotation['id'] = $this->companyName . '_' . time();
             $quotation['transportador'] = $this->companyName;
 
             if (!$sswQuotation['erro']) {
