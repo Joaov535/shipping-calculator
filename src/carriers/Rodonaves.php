@@ -6,7 +6,6 @@ use shippingCalculator\ShippingCostCalculator;
 
 class Rodonaves implements CarriersInterface
 {
-    private string $token;
     private ShippingCostCalculator $shipping;
     private array $credentials;
     public const URL_QUOTATION_TOKEN = "https://quotation-apigateway.rte.com.br/token";
@@ -70,7 +69,11 @@ class Rodonaves implements CarriersInterface
             )
         );
 
-        return json_decode(curl_exec($ch), true);
+        $res = json_decode(curl_exec($ch), true);
+
+        if (!isset($res['CityId'])) $res['CityId'] = null;
+
+        return $res;
     }
 
     private function getBoxList(): array
@@ -135,10 +138,9 @@ class Rodonaves implements CarriersInterface
         $responseQuotation = json_decode($response, true);
         curl_close($ch);
 
-        $referenceCode = 'code_quotation_rodonaves_' . time();
-        $quotation['id'] = $referenceCode;
-        $quotation['tempo_previsto'] = $responseQuotation['DeliveryTime'] ?? "Sem resposta";
-        $quotation['valor_total'] = $responseQuotation['Value'] ?? 0;
+        $quotation['id'] = 'Rodonaves_' . time();
+        $quotation['tempo_previsto'] = $responseQuotation['DeliveryTime'] ?: "Sem resposta";
+        $quotation['valor_total'] = $responseQuotation['Value'] ?: 0;
         $quotation['transportador'] = "Rodonaves";
 
         return $quotation;
