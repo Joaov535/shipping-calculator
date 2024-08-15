@@ -4,6 +4,7 @@ namespace shippingCalculator;
 
 use shippingCalculator\carriers\AlfaTransportes;
 use shippingCalculator\carriers\Atual;
+use shippingCalculator\carriers\BauerExpress;
 use shippingCalculator\carriers\Braspress;
 use shippingCalculator\carriers\Jundiai;
 use shippingCalculator\carriers\Movvi;
@@ -352,6 +353,16 @@ class ShippingCostCalculator
     {
         $company = new AlfaTransportes($this, $token);
         return $company->doRequest();
+    }
+
+    /**
+     * @param array $credentials ["login" => xxxxx, "password" => xxxxx, "domain" => ]
+     * @return array
+     */
+    public function getBauerShippingCost(array $credentials): array
+    {
+        $excellence = new BauerExpress($this, $credentials, 'Excellence', true);
+        return $excellence->doRequest();
     }
 
     public function toArray(): array
