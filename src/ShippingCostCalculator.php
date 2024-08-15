@@ -6,6 +6,7 @@ use shippingCalculator\carriers\AlfaTransportes;
 use shippingCalculator\carriers\Atual;
 use shippingCalculator\carriers\BauerExpress;
 use shippingCalculator\carriers\Braspress;
+use shippingCalculator\carriers\Excellence;
 use shippingCalculator\carriers\Jundiai;
 use shippingCalculator\carriers\Movvi;
 use shippingCalculator\carriers\Rodonaves;
@@ -345,7 +346,7 @@ class ShippingCostCalculator
      */
     public function getExcellenceShippingCost(array $credentials): array
     {
-        $excellence = new Atual($this, $credentials, 'Excellence', true);
+        $excellence = new Excellence($this, $credentials, 'Excellence', true);
         return $excellence->doRequest();
     }
 
