@@ -384,7 +384,7 @@ class ShippingCostCalculator
             'collectDate' => $this->collectDate,
             'serialValue' => $this->serialValue,
             'totalWeight' => $this->totalWeight,
-            'numTotalBoxes' => $this->numTotalBoxes,
+            'numTotalBoxes' => $this->getNumTotalBoxes(),
             'boxList' => $this->boxList,
         ];
     }
