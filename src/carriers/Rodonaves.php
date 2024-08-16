@@ -139,7 +139,7 @@ class Rodonaves implements CarriersInterface
         curl_close($ch);
 
         $quotation['id'] = 'Rodonaves_' . time();
-        $quotation['tempo_previsto'] = $responseQuotation['DeliveryTime'] ?: "Sem resposta";
+        $quotation['tempo_previsto'] = isset( $responseQuotation['DeliveryTime']) ? $responseQuotation['DeliveryTime'] : "Sem resposta";
         $quotation['valor_total'] = $responseQuotation['Value'] ?: 0;
         $quotation['transportador'] = "Rodonaves";
 

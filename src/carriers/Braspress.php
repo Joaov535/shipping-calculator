@@ -76,7 +76,7 @@ class Braspress implements CarriersInterface
 
         $quotation['id'] = $response['id'];
         $quotation['transportador'] = $this->companyName;
-        $quotation['tempo_previsto'] = $response['prazo'];
+        $quotation['tempo_previsto'] = isset($response['prazo']) ?  $response['prazo'] : "Sem retorno do prazo";
         $quotation['valor_total'] = str_replace(",", ".", $response['totalFrete']);
 
         return $quotation;
