@@ -74,9 +74,17 @@ class Braspress implements CarriersInterface
             return $quotation;
         }
 
+        if($response['statusCode'] == 400) {
+            $quotation['id'] = $this->companyName . '_' . time();
+            $quotation['transportador'] = $this->companyName;
+            $quotation['tempo_previsto'] = $response['errorList'][0] ?? $response['message'];
+            $quotation['valor_total'] = 0;
+            return $quotation;
+        }
+
         $quotation['id'] = $response['id'];
         $quotation['transportador'] = $this->companyName;
-        $quotation['tempo_previsto'] = isset($response['prazo']) ?  $response['prazo'] : "Sem retorno do prazo";
+        $quotation['tempo_previsto'] = $response['prazo'] ?? "Sem retorno do prazo";
         $quotation['valor_total'] = str_replace(",", ".", $response['totalFrete']);
 
         return $quotation;
