@@ -74,7 +74,7 @@ class Braspress implements CarriersInterface
             return $quotation;
         }
 
-        if($response['statusCode'] == 400) {
+        if(isset($response['statusCode']) && $response['statusCode'] == 400) {
             $quotation['id'] = $this->companyName . '_' . time();
             $quotation['transportador'] = $this->companyName;
             $quotation['tempo_previsto'] = $response['errorList'][0] ?? $response['message'];
