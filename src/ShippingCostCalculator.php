@@ -362,7 +362,7 @@ class ShippingCostCalculator
      */
     public function getBauerShippingCost(array $credentials): array
     {
-        $excellence = new BauerExpress($this, $credentials, 'Excellence', true);
+        $excellence = new BauerExpress($this, $credentials, 'Bauer', true);
         return $excellence->doRequest();
     }
 
