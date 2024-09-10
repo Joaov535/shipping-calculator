@@ -55,7 +55,7 @@ abstract class AbstractSsw implements CarriersInterface
                 $this->shipping->getSerialValue(),
                 $this->shipping->getNumTotalBoxes(),
                 $this->shipping->getTotalWeight(),
-                $this->inMeters ? $this->shipping->getTotalVolumeinMeters() : $this->shipping->getTotalVolume(),
+                $this->inMeters ? $this->shipping->getTotalVolumeInMeters() : $this->shipping->getTotalVolume(),
                 1,
                 "C",
                 $this->shipping->getSenderCNPJ(),

@@ -19,7 +19,7 @@ class AlfaTransportes implements CarriersInterface
             "&cliCnpj=" . $shipping->getReceiverIdentification() .
             "&merVlr=" . $shipping->getSerialValue() .
             "&merPeso=" . $shipping->getTotalWeight() .
-            "&merM3=" . $shipping->getTotalVolumeinMeters() .
+            "&merM3=" . $shipping->getTotalVolumeInMeters() .
             "&modoJson=" . "1";
     }
 
