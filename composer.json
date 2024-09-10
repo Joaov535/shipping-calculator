@@ -1,7 +1,7 @@
 {
   "name": "joaov535/shipping-calculator",
   "description": "Biblioteca para realizar a cotação com algumas transportadoras nacionais.",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "keywords": [
     "Frete",
     "Cotação",
