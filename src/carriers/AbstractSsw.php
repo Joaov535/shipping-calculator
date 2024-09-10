@@ -12,6 +12,7 @@ abstract class AbstractSsw implements CarriersInterface
     private array $options;
     private array $credentials;
     private bool $inMeters;
+    protected int $commodity = 1;
 
     public function __construct(ShippingCostCalculator $shipping, array $credentials, string $companyName, bool $inMeters = false)
     {
@@ -56,7 +57,7 @@ abstract class AbstractSsw implements CarriersInterface
                 $this->shipping->getNumTotalBoxes(),
                 $this->shipping->getTotalWeight(),
                 $this->inMeters ? $this->shipping->getTotalVolumeInMeters() : $this->shipping->getTotalVolume(),
-                1,
+                $this->commodity,
                 "C",
                 $this->shipping->getSenderCNPJ(),
                 $this->shipping->getReceiverIdentification(),

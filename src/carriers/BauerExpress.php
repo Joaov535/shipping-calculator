@@ -6,5 +6,5 @@ use shippingCalculator\carriers\AbstractSsw;
 
 class BauerExpress extends AbstractSsw
 {
-
+    protected int $commodity = 3;
 }
