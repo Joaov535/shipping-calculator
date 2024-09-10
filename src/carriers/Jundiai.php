@@ -46,7 +46,7 @@ class Jundiai implements CarriersInterface
             "cepEntrega" => $this->shipping->getReceiverZipCode(),
             "codCondicaoContrato" => 0,
             "pesoNominal" => $this->shipping->getTotalWeight(),
-            "cubagem" => $this->shipping->getTotalVolumeInMetters(),
+            "cubagem" => $this->shipping->getTotalVolumeinMeters(),
             "vlMercadoria" => $this->shipping->getSerialValue(),
             "qtVolumes" => $this->shipping->getNumTotalBoxes(),
             "codEmbagem" => 0,

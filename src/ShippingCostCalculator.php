@@ -253,7 +253,7 @@ class ShippingCostCalculator
         return $acc;
     }
 
-    public function getTotalVolumeInMetters(): int|float
+    public function getTotalVolumeinMeters(): int|float
     {
         return $this->getTotalVolume() * pow(10, -6);
     }
