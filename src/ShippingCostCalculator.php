@@ -7,7 +7,6 @@ use shippingCalculator\carriers\Atual;
 use shippingCalculator\carriers\BauerExpress;
 use shippingCalculator\carriers\Braspress;
 use shippingCalculator\carriers\Excellence;
-use shippingCalculator\carriers\Jundiai;
 use shippingCalculator\carriers\Movvi;
 use shippingCalculator\carriers\Rodonaves;
 use shippingCalculator\carriers\Tnt;
@@ -321,13 +320,6 @@ class ShippingCostCalculator
     {
         $tnt = new Tnt($this, $credentials);
         return $tnt->doRequest();
-    }
-
-
-    public function getJundiaiShippingCost(string $token): array
-    {
-        $jundiai = new Jundiai($this, $token);
-        return $jundiai->doRequest();
     }
 
     /**
