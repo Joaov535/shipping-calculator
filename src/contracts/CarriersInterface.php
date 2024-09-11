@@ -1,6 +1,6 @@
 <?php
 
-namespace shippingCalculator\carriers;
+namespace shippingCalculator\contracts;
 
 interface CarriersInterface
 {

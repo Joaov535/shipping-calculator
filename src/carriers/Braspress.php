@@ -2,6 +2,7 @@
 
 namespace shippingCalculator\carriers;
 
+use shippingCalculator\contracts\CarriersInterface;
 use shippingCalculator\ShippingCostCalculator;
 
 class Braspress implements CarriersInterface
