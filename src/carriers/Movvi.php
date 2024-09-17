@@ -35,7 +35,7 @@ class Movvi implements CarriersInterface
                 CURLOPT_POST => true,
                 CURLOPT_HTTPHEADER => $headers,
                 CURLOPT_POSTFIELDS => json_encode($this->credentials),
-                CURLOPT_VERBOSE => true,
+                CURLOPT_VERBOSE => false,
                 CURLOPT_RETURNTRANSFER => true
             )
         );
@@ -90,7 +90,7 @@ class Movvi implements CarriersInterface
                 CURLOPT_POST => true,
                 CURLOPT_HTTPHEADER => $requestHeaderCotacao,
                 CURLOPT_POSTFIELDS => json_encode($this->requestBody),
-                CURLOPT_VERBOSE => true,
+                CURLOPT_VERBOSE => false,
                 CURLOPT_RETURNTRANSFER => true
             )
         );
