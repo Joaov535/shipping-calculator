@@ -50,7 +50,7 @@ class Braspress implements CarriersInterface
                     'Content-Length: ' . strlen($this->requestBody)
                 ],
                 CURLOPT_POSTFIELDS => $this->requestBody,
-                CURLOPT_VERBOSE => true,
+                CURLOPT_VERBOSE => false,
                 CURLOPT_RETURNTRANSFER => true
 
             ]
