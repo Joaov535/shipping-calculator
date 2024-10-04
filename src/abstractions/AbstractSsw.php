@@ -1,29 +1,24 @@
 <?php
 
-namespace shippingCalculator\carriers;
+namespace shippingCalculator\abstractions;
 
 use shippingCalculator\contracts\CarriersInterface;
 use shippingCalculator\ShippingCostCalculator;
 
-abstract class AbstractSsw implements CarriersInterface
+abstract class AbstractSsw extends AbstractCarriers
 {
-    private string $companyName;
     public const ENDPOINT = 'https://ssw.inf.br/ws/sswCotacaoColeta/index.php?wsdl';
-    private ShippingCostCalculator $shipping;
-    private array $options;
-    private array $credentials;
-    private bool $inMeters;
+    protected array $options;
+    protected bool $inMeters;
     protected int $commodity = 1;
 
-    public function __construct(ShippingCostCalculator $shipping, array $credentials, string $companyName, bool $inMeters = false)
+    public function __construct(ShippingCostCalculator $shipping, array $credentials, bool $inMeters = false)
     {
+        parent::__construct();
         $this->inMeters = $inMeters;
         $this->shipping = $shipping;
-        $this->companyName = $companyName;
-
-        $this->credentials['login'] = $credentials['login'];
-        $this->credentials['password'] = $credentials['password'];
-        $this->credentials['domain'] = $credentials['domain'];
+        $this->setCompanyName();
+        $this->setCredentials($credentials);
 
         $this->options = [
             'cache_wsdl' => WSDL_CACHE_NONE,
@@ -34,18 +29,27 @@ abstract class AbstractSsw implements CarriersInterface
                         'verify_peer' => false,
                         'verify_peer_name' => false,
                         'allow_self_signed' => true
+                    ],
+                    'http' => [
+                        'encoding' => 'utf-8'
                     ]
                 ]
             )
         ];
     }
 
-
-    public function doRequest()
+    protected function setCredentials(array|string $credentials): void
     {
-        $quotation = [];
+        $this->credentials['login'] = $credentials['login'];
+        $this->credentials['password'] = $credentials['password'];
+        $this->credentials['domain'] = $credentials['domain'];
+    }
 
+    public function doRequest(): array
+    {
         try {
+            $this->response->transportador = $this->companyName;
+
             $client = new \SoapClient(self::ENDPOINT, $this->options);
             $xml = $client->cotar(
                 $this->credentials['domain'],
@@ -68,22 +72,19 @@ abstract class AbstractSsw implements CarriersInterface
 
             $sswQuotation = (array)simplexml_load_string($xml);
 
-            $quotation['id'] = $this->companyName . '_' . time();
-            $quotation['transportador'] = $this->companyName;
+            if (isset($sswQuotation['mensagem']) && $sswQuotation['mensagem'] != "OK") throw new \Exception($sswQuotation['mensagem']);
+            if (empty($sswQuotation['prazo'])) throw new \Exception("Prazo não retornado");
+            if (empty($sswQuotation['frete'])) throw new \Exception("Valor do frete não retornado");
 
-            if (!$sswQuotation['erro']) {
-                $quotation['tempo_previsto'] = $sswQuotation['prazo'];
-                $quotation['valor_total'] = str_replace(",", ".", $sswQuotation['frete']);
-            } else {
-                $quotation['tempo_previsto'] = $sswQuotation['mensagem'];
-                $quotation['valor_total'] = 0;
-            }
+            $this->response->tempo_previsto = $sswQuotation['prazo'];
+            $value = str_replace(".", "", $sswQuotation['frete']);
+            $value = str_replace(",", ".", $value);
+            $this->response->valor_total = floatval(floatval($value));
+
         } catch (\Exception $e) {
-            return [
-                "erro" => "SSW: " . $e->getMessage()
-            ];
+            $this->response->exception = $e->getMessage();
         }
 
-        return $quotation;
+        return $this->response->toArray();
     }
 }

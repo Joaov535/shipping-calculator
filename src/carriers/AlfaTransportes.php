@@ -2,26 +2,31 @@
 
 namespace shippingCalculator\carriers;
 
-use shippingCalculator\contracts\CarriersInterface;
+use shippingCalculator\abstractions\AbstractCarriers;
 use shippingCalculator\ShippingCostCalculator;
 
-class AlfaTransportes implements CarriersInterface
+class AlfaTransportes extends AbstractCarriers
 {
     public const API = "https://api.alfatransportes.com.br/cotacao/?";
     private string $urlRequest;
 
     public function __construct(ShippingCostCalculator $shipping, $token)
     {
-        $this->urlRequest = self::API .
-            "idr=" . $token .
-            "&cliTip=" . $this->isCorporation($shipping->getSenderPersonType()) .
-            "&cepRem=" . $shipping->getSenderZipCode() .
-            "&cliCep=" . $shipping->getReceiverZipCode() .
-            "&cliCnpj=" . $shipping->getReceiverIdentification() .
-            "&merVlr=" . $shipping->getSerialValue() .
-            "&merPeso=" . $shipping->getTotalWeight() .
-            "&merM3=" . $shipping->getTotalVolumeInMeters() .
-            "&modoJson=" . "1";
+        parent::__construct();
+        $this->credentials = $token;
+        $this->shipping = $shipping;
+        $this->setCompanyName();
+        $this->setRequestUrl();
+    }
+
+    protected function setCredentials(array|string $credentials): void
+    {
+        $this->credentials = $credentials;
+    }
+
+    protected function setCompanyName(): void
+    {
+        $this->companyName = "Alfa Transportes";
     }
 
     private function isCorporation($senderType)
@@ -29,32 +34,44 @@ class AlfaTransportes implements CarriersInterface
         return $senderType == 'J' ? 1 : 0;
     }
 
+    private function setRequestUrl(): void
+    {
+        $this->urlRequest = self::API .
+            "idr=" . $this->credentials .
+            "&cliTip=" . $this->isCorporation($this->shipping->getSenderPersonType()) .
+            "&cepRem=" . $this->shipping->getSenderZipCode() .
+            "&cliCep=" . $this->shipping->getReceiverZipCode() .
+            "&cliCnpj=" . $this->shipping->getReceiverIdentification() .
+            "&merVlr=" . $this->shipping->getSerialValue() .
+            "&merPeso=" . $this->shipping->getTotalWeight() .
+            "&merM3=" . $this->shipping->getTotalVolumeInMeters() .
+            "&modoJson=" . "1";
+    }
+
     public function doRequest(): array
     {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->urlRequest);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $response = json_decode(curl_exec($ch), true);
+        try {
+            $this->response->transportador = $this->companyName;
 
-        curl_close($ch);
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $this->urlRequest);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_ENCODING, 'UTF-8');
+            $response = json_decode(curl_exec($ch), true);
+            curl_close($ch);
 
-        $quotation = [];
-        $quotation['id'] = 'Alfa_Transportes_' . time();
-        $quotation['transportador'] = 'Alfa Transportes';
+            if (empty($response['cotacao'])) {
+                throw new \Exception("Sem resposta");
+            }
 
-        if (empty($response['cotacao'])) {
-            $quotation['tempo_previsto'] =  'Sem resposta';
-            $quotation['valor_total'] = 0;
-        } else {
-            $quotation['tempo_previsto'] =  intval($response['cotacao']['emissao']['diasEntrega']);
-            $quotation['valor_total'] = $response['cotacao']['emissao']['valoresCotacao']['valorTotal'];
+            $this->response->tempo_previsto = intval($response['cotacao']['emissao']['diasEntrega']);
+            $this->response->valor_total = $response['cotacao']['emissao']['valoresCotacao']['valorTotal'];
+        } catch (\Exception $e) {
+            $this->response->exception = $e->getMessage();
         }
 
-        if (curl_errno($ch)) {
-            $quotation['tempo_previsto'] =  'Sem resposta';
-            $quotation['valor_total'] = 0;
-        }
-
-        return $quotation;
+        return $this->response->toArray();
     }
+
+
 }

@@ -2,13 +2,11 @@
 
 namespace shippingCalculator\carriers;
 
-use shippingCalculator\contracts\CarriersInterface;
+use shippingCalculator\abstractions\AbstractCarriers;
 use shippingCalculator\ShippingCostCalculator;
 
-class Rodonaves implements CarriersInterface
+class Rodonaves extends AbstractCarriers
 {
-    private ShippingCostCalculator $shipping;
-    private array $credentials;
     public const URL_QUOTATION_TOKEN = "https://quotation-apigateway.rte.com.br/token";
     public const URL_CITY_ID_TOKEN = "https://01wapi.rte.com.br/token";
     public const URL_QUOTE = "https://quotation-apigateway.rte.com.br/api/v1/simula-cotacao";
@@ -16,10 +14,22 @@ class Rodonaves implements CarriersInterface
 
     public function __construct(ShippingCostCalculator $shipping, array $credentials)
     {
+        parent::__construct();
         $this->shipping = $shipping;
+        $this->setCompanyName();
+        $this->setCredentials($credentials);
+        $this->setBodyRequest();
+    }
+
+    protected function setCredentials(array|string $credentials): void
+    {
         $this->credentials['user'] = $credentials['user'];
         $this->credentials['password'] = $credentials['password'];
-        $this->setBodyRequest();
+    }
+
+    protected function setCompanyName(): void
+    {
+        $this->companyName = 'Rodonaves';
     }
 
     private function getToken(string $url): string
@@ -110,41 +120,46 @@ class Rodonaves implements CarriersInterface
 
     public function doRequest(): array
     {
-        $ch = curl_init(self::URL_QUOTE);
-        $headers = [
-            "Authorization: Bearer {$this->getToken(self::URL_QUOTATION_TOKEN)}",
-            'accept: application/json',
-            'content-type: application/*+json'
-        ];
+        try {
+            $this->response->transportador = $this->companyName;
 
-        curl_setopt_array(
-            $ch,
-            array(
-                CURLOPT_URL => self::URL_QUOTE,
-                CURLOPT_POST => true,
-                CURLOPT_HTTPHEADER => $headers,
-                CURLOPT_POSTFIELDS => json_encode($this->requestBody),
-                CURLOPT_RETURNTRANSFER => true
-            )
-        );
+            $ch = curl_init(self::URL_QUOTE);
+            $headers = [
+                "Authorization: Bearer {$this->getToken(self::URL_QUOTATION_TOKEN)}",
+                'accept: application/json',
+                'content-type: application/*+json'
+            ];
 
-        $response = curl_exec($ch);
+            curl_setopt_array(
+                $ch,
+                array(
+                    CURLOPT_URL => self::URL_QUOTE,
+                    CURLOPT_POST => true,
+                    CURLOPT_HTTPHEADER => $headers,
+                    CURLOPT_POSTFIELDS => json_encode($this->requestBody),
+                    CURLOPT_RETURNTRANSFER => true
+                )
+            );
 
-        if (curl_errno($ch)) {
-            echo 'Erro: ' . curl_error($ch);
+            $response = curl_exec($ch);
+
+            if (curl_errno($ch)) {
+                curl_close($ch);
+                throw new \Exception(curl_error($ch));
+            }
+
+            $responseQuotation = json_decode($response, true);
             curl_close($ch);
-            return [];
+
+            if (empty($responseQuotation['DeliveryTime']))  throw new \Exception("Tempo previsto não retornado");
+            $this->response->tempo_previsto = $responseQuotation['DeliveryTime'];
+
+            if (empty($responseQuotation['Value'])) throw new \Exception("Valor do frete não retornado");
+            $this->response->valor_total = $responseQuotation['Value'];
+        } catch (\Exception $e) {
+            $this->response->exception = $e->getMessage();
         }
 
-        $responseQuotation = json_decode($response, true);
-        curl_close($ch);
-
-        $quotation['id'] = 'Rodonaves_' . time();
-        $quotation['tempo_previsto'] = $responseQuotation['DeliveryTime'] ?? "Sem resposta";
-        $quotation['valor_total'] = $responseQuotation['Value'] ?? 0;
-        $quotation['transportador'] = "Rodonaves";
-
-        return $quotation;
+        return $this->response->toArray();
     }
-
 }

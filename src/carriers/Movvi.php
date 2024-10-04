@@ -2,25 +2,22 @@
 
 namespace shippingCalculator\carriers;
 
-use shippingCalculator\contracts\CarriersInterface;
+use shippingCalculator\abstractions\AbstractCarriers;
 use shippingCalculator\ShippingCostCalculator;
 
-class Movvi implements CarriersInterface
+class Movvi extends AbstractCarriers
 {
-
+    private const URL_TOKEN = "https://sim.movvi.com.br/publico/login_check";
+    private const URL_QUOTE = "https://sim.movvi.com.br/publico/api/precificacao/";
     private string $token;
-    private ShippingCostCalculator $shipping;
-    private array $credentials;
-    private string $companyName = "Movvi";
-    public const URL_TOKEN = "https://sim.movvi.com.br/publico/login_check";
-    public const URL_QUOTE = "https://sim.movvi.com.br/publico/api/precificacao/";
     private array $requestBody;
 
     public function __construct(ShippingCostCalculator $shipping, array $credentials)
     {
+        parent::__construct();
         $this->shipping = $shipping;
-        $this->credentials['username'] = $credentials['user'];
-        $this->credentials['password'] = $credentials['password'];
+        $this->setCompanyName();
+        $this->setCredentials($credentials);
         $this->setToken();
         $this->setBodyRequest();
     }
@@ -61,7 +58,7 @@ class Movvi implements CarriersInterface
         return $boxList;
     }
 
-    private function setBodyRequest()
+    private function setBodyRequest(): void
     {
         $this->requestBody = [
             "dadosCotacao" => [
@@ -75,43 +72,52 @@ class Movvi implements CarriersInterface
         ];
     }
 
-    public function doRequest()
+    public function doRequest(): array
     {
-        $urlCotacao = "https://sim.movvi.com.br/publico/api/precificacao/";
-        $requestHeaderCotacao = array(
-            "Authorization: Bearer " . $this->token,
-            "Content-Type: application/json",
-        );
+        try {
+            $this->response->transportador = $this->companyName;
 
-        $chCotacao = curl_init(self::URL_QUOTE);
-        curl_setopt_array(
-            $chCotacao,
-            array(
-                CURLOPT_POST => true,
-                CURLOPT_HTTPHEADER => $requestHeaderCotacao,
-                CURLOPT_POSTFIELDS => json_encode($this->requestBody),
-                CURLOPT_VERBOSE => false,
-                CURLOPT_RETURNTRANSFER => true
-            )
-        );
+            $requestHeaderCotacao = array(
+                "Authorization: Bearer " . $this->token,
+                "Content-Type: application/json",
+            );
 
-        $responseQuotation = json_decode(curl_exec($chCotacao), true);
-        curl_close($chCotacao);
+            $chCotacao = curl_init(self::URL_QUOTE);
+            curl_setopt_array(
+                $chCotacao,
+                array(
+                    CURLOPT_POST => true,
+                    CURLOPT_HTTPHEADER => $requestHeaderCotacao,
+                    CURLOPT_POSTFIELDS => json_encode($this->requestBody),
+                    CURLOPT_VERBOSE => false,
+                    CURLOPT_RETURNTRANSFER => true
+                )
+            );
 
-        if (!isset($responseQuotation['mensagem'])) {
-            $quotation['id'] = $this->companyName .'_'.time();
-            $quotation['tempo_previsto'] = $responseQuotation['cotacoes']['horasPrazoEntrega'] / 24;
-            $quotation['valor_total'] = round(floatval($responseQuotation['cotacoes']['ffValorCotacao']), 2);
-            $quotation['transportador'] = $this->companyName;
+            $responseQuotation = json_decode(curl_exec($chCotacao), true);
+            curl_close($chCotacao);
 
-            return $quotation;
+            if (empty($responseQuotation['cotacoes']['horasPrazoEntrega'])) throw new \Exception("Prazo não retornado");
+            if (empty($responseQuotation['cotacoes']['ffValorCotacao'])) throw new \Exception("Valor do frete não retornado");
+
+            $this->response->tempo_previsto = $responseQuotation['cotacoes']['horasPrazoEntrega'] / 24;
+            $this->response->valor_total = round(floatval($responseQuotation['cotacoes']['ffValorCotacao']), 2);
+
+        } catch (\Exception $e) {
+            $this->response->exception = $e->getMessage();
         }
 
-        $quotation['id'] =  $this->companyName .'_'.time();
-        $quotation['transportador'] = $this->companyName;
-        $quotation['tempo_previsto'] = "Sem resposta";
-        $quotation['valor_total'] = 0;
-        return $quotation;
+        return $this->response->toArray();
     }
 
+    protected function setCredentials(array|string $credentials)
+    {
+        $this->credentials['username'] = $credentials['user'];
+        $this->credentials['password'] = $credentials['password'];
+    }
+
+    protected function setCompanyName(): void
+    {
+        $this->companyName = "Movvi";
+    }
 }

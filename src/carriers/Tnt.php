@@ -2,14 +2,12 @@
 
 namespace shippingCalculator\carriers;
 
-use shippingCalculator\contracts\CarriersInterface;
+use shippingCalculator\abstractions\AbstractCarriers;
 use shippingCalculator\ShippingCostCalculator;
 
-class Tnt implements CarriersInterface
+class Tnt extends AbstractCarriers
 {
-    private ShippingCostCalculator $shipping;
-    private array $credentials;
-    public const WSDL = "https://ws.tntbrasil.com.br/tntws/CalculoFrete?wsdl";
+    private const WSDL = "https://ws.tntbrasil.com.br/tntws/CalculoFrete?wsdl";
     private array $requestBody;
     private string $xmlr;
 
@@ -19,12 +17,23 @@ class Tnt implements CarriersInterface
      */
     public function __construct(ShippingCostCalculator $shipping, array $credentials)
     {
+        parent::__construct();
         $this->shipping = $shipping;
-        $this->credentials = [];
-        $this->credentials['login'] = $credentials['login'];
-        $this->credentials['senha'] = $credentials['password'];
+        $this->setCompanyName();
+        $this->setCredentials($credentials);
         $this->setRequestBody();
         $this->setXmlr();
+    }
+
+    protected function setCredentials(array|string $credentials): void
+    {
+        $this->credentials['login'] = $credentials['login'];
+        $this->credentials['senha'] = $credentials['password'];
+    }
+
+    protected function setCompanyName()
+    {
+        $this->companyName = 'TNT';
     }
 
     public function setRequestBody(): void
@@ -35,7 +44,7 @@ class Tnt implements CarriersInterface
             "identificadorRemetente" => $this->shipping->getSenderCNPJ(),
             "identificadorDestinatario" => $this->shipping->getReceiverIdentification(),
             "tipoFrete" => "C", //CIF
-            "tipoServico" => $this->shipping->getTransportType() == 'R' ? "RNC" : "ANC",
+            "tipoServico" => $this->shipping->getTransportType() == 'A' ? "ANC" : "RNC",
             "cepOrigem" => $this->shipping->getSenderZipCode(),
             "cepDestino" => $this->shipping->getReceiverZipCode(),
             "valorMercadoria" => $this->shipping->getSerialValue(),
@@ -83,7 +92,7 @@ class Tnt implements CarriersInterface
 
     public function doRequest(): array
     {
-        $quotation = ['transportador' => 'TNT'];
+        $this->response->transportador = $this->companyName;
 
         try {
             $action_URL = 'https://ws.tntbrasil.com.br:443/tntws/CalculoFrete';
@@ -101,16 +110,17 @@ class Tnt implements CarriersInterface
                 $dom = new \DOMDocument('1.0', 'ISO-8859-1');
                 $dom->loadXml($xml);
 
-                $quotation['tempo_previsto'] = $dom->getElementsByTagName('prazoEntrega')->item(0)->nodeValue ?? substr($dom->textContent, 0, 64) . "[...]";
-                $quotation['valor_total'] = $dom->getelementsByTagName('vlTotalFrete')->item(0)->nodeValue ?? 0;
+                if (!empty($dom->getElementsByTagName('prazoEntrega')->item(0)->nodeValue)) {
+                    $this->response->tempo_previsto = $dom->getElementsByTagName('prazoEntrega')->item(0)->nodeValue;
+                    $this->response->valor_total = $dom->getelementsByTagName('vlTotalFrete')->item(0)->nodeValue ?? 0;
+                } else {
+                    $this->response->exception = substr($dom->textContent, 0, 100) . "[...]";
+                }
             }
-
-
-            return $quotation;
         } catch (\Exception $e) {
-            return [
-                "erro" => "TNT: " . $e->getMessage()
-            ];
+           $this->response->exception = $e->getMessage();
         }
+
+        return $this->response->toArray();
     }
 }

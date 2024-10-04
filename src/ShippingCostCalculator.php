@@ -328,7 +328,7 @@ class ShippingCostCalculator
      */
     public function getAtualShippingCost(array $credentials): array
     {
-        $atual = new Atual($this, $credentials, 'Atual', true);
+        $atual = new Atual($this, $credentials, true);
         return $atual->doRequest();
     }
 
@@ -338,7 +338,7 @@ class ShippingCostCalculator
      */
     public function getExcellenceShippingCost(array $credentials): array
     {
-        $excellence = new Excellence($this, $credentials, 'Excellence', true);
+        $excellence = new Excellence($this, $credentials, true);
         return $excellence->doRequest();
     }
 
@@ -354,7 +354,7 @@ class ShippingCostCalculator
      */
     public function getBauerShippingCost(array $credentials): array
     {
-        $bauer = new BauerExpress($this, $credentials, 'Bauer', true);
+        $bauer = new BauerExpress($this, $credentials, true);
         return $bauer->doRequest();
     }
 

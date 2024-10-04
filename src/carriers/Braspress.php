@@ -2,21 +2,21 @@
 
 namespace shippingCalculator\carriers;
 
+use shippingCalculator\abstractions\AbstractCarriers;
 use shippingCalculator\contracts\CarriersInterface;
 use shippingCalculator\ShippingCostCalculator;
 
-class Braspress implements CarriersInterface
+class Braspress extends AbstractCarriers
 {
     public const API = "https://api.braspress.com/v1/cotacao/calcular/json";
-    private string $token;
     private string $requestBody;
-    private ShippingCostCalculator $shipping;
-    private string $companyName = 'Braspress';
 
     public function __construct(string $token, ShippingCostCalculator $shipping)
     {
-        $this->token = $token;
+        parent::__construct();
         $this->shipping = $shipping;
+        $this->setCompanyName();
+        $this->setCredentials($token);
         $this->setRequestBody();
     }
 
@@ -40,55 +40,45 @@ class Braspress implements CarriersInterface
 
     public function doRequest(): array
     {
-        $ch = curl_init(self::API);
+        try {
+            $this->response->transportador = $this->companyName;
 
-        curl_setopt_array(
-            $ch, [
-                CURLOPT_POST => true,
-                CURLOPT_HTTPHEADER => [
-                    'Authorization: Basic ' . $this->token,
-                    'Content-Type: application/json',
-                    'Content-Length: ' . strlen($this->requestBody)
-                ],
-                CURLOPT_POSTFIELDS => $this->requestBody,
-                CURLOPT_VERBOSE => false,
-                CURLOPT_RETURNTRANSFER => true
+            $ch = curl_init(self::API);
 
-            ]
-        );
+            curl_setopt_array(
+                $ch, [
+                    CURLOPT_POST => true,
+                    CURLOPT_HTTPHEADER => [
+                        'Authorization: Basic ' . $this->credentials,
+                        'Content-Type: application/json',
+                        'Content-Length: ' . strlen($this->requestBody)
+                    ],
+                    CURLOPT_POSTFIELDS => $this->requestBody,
+                    CURLOPT_VERBOSE => false,
+                    CURLOPT_RETURNTRANSFER => true
 
-        $response = json_decode(curl_exec($ch), true);
+                ]
+            );
 
-        if (curl_errno($ch)) {
-            $response = [
-                "erro" => curl_error($ch)
-            ];
+            $response = json_decode(curl_exec($ch), true);
+
+            if (curl_errno($ch)) throw new \Exception(curl_error($ch));
+
+            curl_close($ch);
+
+            if (isset($response['statusCode']) && $response['statusCode'] == 400) {
+                throw new \Exception(($response['errorList'][0] ?? $response['message']) ?? "Sem Resposta");
+            }
+
+            if (empty($response['prazo'])) throw new \Exception("Prazo não retornado");
+            if (empty($response['totalFrete'])) throw new \Exception("Valor do frete não retornado");
+
+            $this->response->tempo_previsto = $response['prazo'];
+            $this->response->valor_total = str_replace(",", ".", $response['totalFrete']);
+        } catch (\Exception $e) {
+            $this->response->exception = $e->getMessage();
         }
-
-        curl_close($ch);
-
-        if (is_null($response)) {
-            $quotation['id'] = $this->companyName . '_' . time();
-            $quotation['transportador'] = $this->companyName;
-            $quotation['tempo_previsto'] = "Sem resposta";
-            $quotation['valor_total'] = 0;
-            return $quotation;
-        }
-
-        if(isset($response['statusCode']) && $response['statusCode'] == 400) {
-            $quotation['id'] = $this->companyName . '_' . time();
-            $quotation['transportador'] = $this->companyName;
-            $quotation['tempo_previsto'] = $response['errorList'][0] ?? $response['message'];
-            $quotation['valor_total'] = 0;
-            return $quotation;
-        }
-
-        $quotation['id'] = $response['id'];
-        $quotation['transportador'] = $this->companyName;
-        $quotation['tempo_previsto'] = $response['prazo'] ?? "Sem retorno do prazo";
-        $quotation['valor_total'] = str_replace(",", ".", $response['totalFrete']);
-
-        return $quotation;
+        return $this->response->toArray();
     }
 
     private function cubagem(): array
@@ -106,4 +96,13 @@ class Braspress implements CarriersInterface
         return $cubagem;
     }
 
+    protected function setCredentials(array|string $credentials): void
+    {
+        $this->credentials = $credentials;
+    }
+
+    protected function setCompanyName(): void
+    {
+        $this->companyName = "Braspress";
+    }
 }
