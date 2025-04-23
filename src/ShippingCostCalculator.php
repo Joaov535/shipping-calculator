@@ -10,6 +10,7 @@ use shippingCalculator\carriers\Excellence;
 use shippingCalculator\carriers\Movvi;
 use shippingCalculator\carriers\Rodonaves;
 use shippingCalculator\carriers\Tnt;
+use shippingCalculator\carriers\SaoMiguel;
 
 class ShippingCostCalculator
 {
@@ -356,6 +357,15 @@ class ShippingCostCalculator
     {
         $bauer = new BauerExpress($this, $credentials, true);
         return $bauer->doRequest();
+    }
+    
+    /**
+     * @param array $credentials ["login" => xxxxx, "password" => xxxxx]
+     * @return array
+     */
+    public function getSaoMiguelCost(array $credentials) {
+        $saoMiguel = new SaoMiguel($this, $credentials);
+        return $saoMiguel->doRequest();
     }
 
     public function toArray(): array
