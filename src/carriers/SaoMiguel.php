@@ -39,7 +39,7 @@ class SaoMiguel extends \shippingCalculator\abstractions\AbstractCarriers {
         $arr = [
             "tipoPagoPagar" => "P",
             "codigoCidadeDestino" => \shippingCalculator\helper\ViaCEP::getCityInfo($this->shipping->getReceiverZipCode())->ibge,
-            "quantidadeMercadoria" => 2,
+            "quantidadeMercadoria" => $this->shipping->getNumTotalBoxes(),
             "pesoMercadoria" => $this->shipping->getTotalWeight(),
             "valorMercadoria" => $this->shipping->getSerialValue(),
             "tipoPeso" => "P",
