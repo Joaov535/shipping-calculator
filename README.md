@@ -26,25 +26,37 @@ class Consumer
     private $credentials_atual = ["login" => "xxxxxxxxxx", "password" => "xxxxxxxx", "domain" => "ACT"];
 
 
-    public function doRequest($data)
+    public function doRequest()
     {
         $shipping = new \shippingCalculator\ShippingCostCalculator(
             "0000000000000",
             "0000000000000",
-            "J",
+            "J", // ou "F"
             "",
             "00000000",
-            $data->receiverId,
-            $data->ie,
-            substr($data->typePerson, 0, 1),
+            "00000000000", //CNPJ ou CPF
+            "Isento", 
+            "J", // ou "F",
             "",
-            $data->cep,
+            "00000-000",
             "R",
-            $data->statusPayment,
-            $data->colectDate,
-            $data->priceNote,
-            $data->totalWeight,
-            $this->toArray($data->boxList)
+            "Pago",
+            985.50,
+            15.8, //Kg
+            [
+                [
+                  "height"   => 145
+                  "width"    => 124.6
+                  "depth"    => 124
+                  "numBoxes" => 3
+                ],
+                [
+                  "height"   => 121
+                  "width"    => 100
+                  "depth"    => 124
+                  "numBoxes" => 1
+                ]
+            ]
         );
 
 
