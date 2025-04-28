@@ -3,10 +3,6 @@
 namespace shippingCalculator\carriers;
 
 /**
- * Generate By NetBeans
- * 
- * Description of SaoMiguel
- *
  * @author João Victor Cruz
  * @date 23 de abr. de 2025
  */
@@ -96,8 +92,6 @@ class SaoMiguel extends \shippingCalculator\abstractions\AbstractCarriers {
             $this->response->valor_total = $response->valorFrete;
             
         } catch (\Exception $e) {
-            var_dump($e);
-            die;
             $this->response->exception = $e->getMessage();
         }
         
