@@ -247,7 +247,7 @@ class ShippingCostCalculator
     {
         $acc = 0;
         foreach ($this->boxList as $box) {
-            $m3 = (intval($box['width']) * intval($box['height']) * intval($box['depth'])) * intval($box['numBoxes']);
+            $m3 = (floatval($box['width']) * floatval($box['height']) * floatval($box['depth'])) * floatval($box['numBoxes']);
             $acc += $m3;
         }
         return $acc;
@@ -263,9 +263,9 @@ class ShippingCostCalculator
         $boxInMeters = [];
         foreach ($this->boxList as $box) {
             $boxM = [];
-            $boxM['width'] = intval($box['width']) / 100;
-            $boxM['height'] = intval($box['height']) / 100;
-            $boxM['depth'] = intval($box['depth']) / 100;
+            $boxM['width'] = floatval($box['width']) / 100.0;
+            $boxM['height'] = floatval($box['height']) / 100.0;
+            $boxM['depth'] = floatval($box['depth']) / 100.0;
             $boxM['numBoxes'] = intval($box['numBoxes']);
             $boxInMeters[] = $boxM;
         }
