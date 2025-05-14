@@ -66,7 +66,7 @@ class ViaCEP {
      * @param string $cep
      */
     public static function getCityCodeIBGE(string $cep): string {
-        $res = static::getCityCodeIBGE($cep);
+        $res = static::getCityInfo($cep);
 
         return $res->ibge;
     }
