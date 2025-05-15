@@ -52,12 +52,17 @@ class ViaCEP {
         $err = curl_error($curl);
 
         curl_close($curl);
+        $res = json_decode($response);
 
         if ($err) {
             throw new \Exception("cURL Error #:" . $err);
-        } else {
-            return json_decode($response);
         }
+
+        if ($res->erro == "true") {
+            throw new \Exception("Erro ao obter informação do local pelo CEP $cep");
+        }
+
+        return json_decode($response);
     }
 
     /**
