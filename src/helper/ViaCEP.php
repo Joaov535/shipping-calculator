@@ -58,7 +58,7 @@ class ViaCEP {
             throw new \Exception("cURL Error #:" . $err);
         }
 
-        if ($res->erro == "true") {
+        if (isset($res->erro)) {
             throw new \Exception("Erro ao obter informação do local pelo CEP $cep");
         }
 
