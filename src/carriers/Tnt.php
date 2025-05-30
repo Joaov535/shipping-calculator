@@ -114,7 +114,7 @@ class Tnt extends AbstractCarriers
                     $this->response->tempo_previsto = $dom->getElementsByTagName('prazoEntrega')->item(0)->nodeValue;
                     $this->response->valor_total = $dom->getelementsByTagName('vlTotalFrete')->item(0)->nodeValue ?? 0;
                 } else {
-                    $this->response->exception = substr($dom->textContent, 0, 100) . "[...]";
+                    $this->response->exception = substr($dom->textContent, 0, 80) . "[...]";
                 }
             }
         } catch (\Exception $e) {
