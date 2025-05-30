@@ -6,6 +6,7 @@ use shippingCalculator\carriers\AlfaTransportes;
 use shippingCalculator\carriers\Atual;
 use shippingCalculator\carriers\BauerExpress;
 use shippingCalculator\carriers\Braspress;
+use shippingCalculator\carriers\Cruzeiro;
 use shippingCalculator\carriers\Excellence;
 use shippingCalculator\carriers\Movvi;
 use shippingCalculator\carriers\Rodonaves;
@@ -71,8 +72,7 @@ class ShippingCostCalculator
         string    $serialValue,
         float|int $totalWeight,
         array     $boxList
-    )
-    {
+    ) {
         $this->senderCNPJ = $senderCNPJ;
         $this->senderIE = $senderIE;
         $this->senderPersonType = $senderPersonType;
@@ -151,7 +151,7 @@ class ShippingCostCalculator
      */
     public function getReceiverIE(): string
     {
-        return $this->receiverIE;
+        return preg_replace('/[^0-9]/', '',  $this->receiverIE);
     }
 
 
@@ -358,14 +358,25 @@ class ShippingCostCalculator
         $bauer = new BauerExpress($this, $credentials, true);
         return $bauer->doRequest();
     }
-    
+
     /**
      * @param array $credentials ["login" => xxxxx, "password" => xxxxx]
      * @return array
      */
-    public function getSaoMiguelCost(array $credentials) {
+    public function getSaoMiguelCost(array $credentials)
+    {
         $saoMiguel = new SaoMiguel($this, $credentials);
         return $saoMiguel->doRequest();
+    }
+
+    /**
+     * @param array $credentials ["login" => xxxxx, "password" => xxxxx, "domain" => ]
+     * @return array
+     */
+    public function getCruzeiroShippingCost(array $credentials): array
+    {
+        $bauer = new Cruzeiro($this, $credentials, true);
+        return $bauer->doRequest();
     }
 
     public function toArray(): array
