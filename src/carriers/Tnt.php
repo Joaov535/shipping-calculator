@@ -95,30 +95,66 @@ class Tnt extends AbstractCarriers
         $this->response->transportador = $this->companyName;
 
         try {
-            $action_URL = 'https://ws.tntbrasil.com.br:443/tntws/CalculoFrete';
-            $uri = 'http://service.calculoFrete.mercurio.com';
+            $action_URL = self::WSDL;
 
-            $client = new \SoapClient(null, array(
-                'location' => self::WSDL,
-                'uri' => $uri,
-                'trace' => 1,
-            ));
+            $headers = [
+                'Content-Type: text/xml; charset=utf-8',
+                'SOAPAction: ""',
+                'Content-Length: ' . strlen($this->xmlr)
+            ];
 
-            $xml = $client->__doRequest($this->xmlr, self::WSDL, $action_URL, 1);
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $action_URL,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $this->xmlr,
+                CURLOPT_HTTPHEADER => $headers,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_CONNECTTIMEOUT => 10,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => false,
+                CURLOPT_USERAGENT => 'PHP cURL SOAP Client',
+                CURLOPT_VERBOSE => true
+            ]);
 
-            if ($xml) {
-                $dom = new \DOMDocument('1.0', 'ISO-8859-1');
-                $dom->loadXml($xml);
+            $xml = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
 
-                if (!empty($dom->getElementsByTagName('prazoEntrega')->item(0)->nodeValue)) {
-                    $this->response->tempo_previsto = $dom->getElementsByTagName('prazoEntrega')->item(0)->nodeValue;
-                    $this->response->valor_total = $dom->getelementsByTagName('vlTotalFrete')->item(0)->nodeValue ?? 0;
-                } else {
-                    $this->response->exception = substr($dom->textContent, 0, 80) . "[...]";
+            if ($error) {
+                throw new \Exception("cURL Error: " . $error);
+            }
+
+            if ($httpCode !== 200) {
+                throw new \Exception("HTTP Error: " . $httpCode);
+            }
+
+            if (!empty($xml)) {
+                $dom = new \DOMDocument('1.0', 'UTF-8');
+                libxml_use_internal_errors(true);
+                $loaded = $dom->loadXml($xml);
+
+                if (!$loaded) {
+                    libxml_clear_errors();
+                    throw new \Exception("Failed to parse XML response");
                 }
+
+                $prazoEntrega = $dom->getElementsByTagName('prazoEntrega')->item(0);
+                $vlTotalFrete = $dom->getElementsByTagName('vlTotalFrete')->item(0);
+
+                if (!empty($prazoEntrega) && !empty($prazoEntrega->nodeValue)) {
+                    $this->response->tempo_previsto = $prazoEntrega->nodeValue;
+                    $this->response->valor_total = $vlTotalFrete->nodeValue ?? 0;
+                } else {
+                    $this->response->exception = "TNT: Sem dados de prazo/valor na resposta";
+                }
+            } else {
+                $this->response->exception = "TNT: Resposta vazia do servidor";
             }
         } catch (\Exception $e) {
-           $this->response->exception = $e->getMessage();
+            $this->response->exception = "TNT Exception: " . $e->getMessage();
         }
 
         return $this->response->toArray();
